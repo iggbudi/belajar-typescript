@@ -6,26 +6,27 @@ export function dashboardPage(): string {
   return `
     <header>
       <div class="header-row">
-        <h1>Aplikasi Kegiatan PKK</h1>
-        <button id="logout-btn" class="icon-btn" title="Logout">🚪</button>
+        <div>
+          <p class="header-kicker">Beranda</p>
+          <h1>Selamat datang</h1>
+        </div>
+        <button id="logout-btn" class="logout-btn" title="Keluar">Keluar</button>
       </div>
-      <p>Kelola kegiatan dan anggota PKK</p>
     </header>
 
-    <section class="card">
-      <h2>Statistik</h2>
-      <div id="stats-container" class="stats-grid">
-        <p class="loading">Memuat data...</p>
+    <section class="hero-card">
+      <h2>Kelola data PKK dengan mudah</h2>
+      <p>Tambah anggota baru, lihat daftar anggota, dan pastikan data tetap rapi.</p>
+      <div class="quick-actions">
+        <button id="btn-tambah-dashboard" class="btn-primary">+ Tambah Anggota</button>
+        <button id="btn-lihat-anggota" class="btn-secondary">Lihat Daftar</button>
       </div>
     </section>
 
     <section class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h2 style="margin: 0;">Anggota Terbaru</h2>
-        <button id="btn-lihat-semua" class="btn-primary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">Lihat Semua</button>
-      </div>
-      <div id="anggota-preview" class="anggota-preview">
-        <p class="loading">Memuat data...</p>
+      <h2>Statistik</h2>
+      <div id="stats-container" class="stats-grid">
+        <p class="loading">Memuat data anggota...</p>
       </div>
     </section>
   `;
@@ -38,7 +39,10 @@ export function mountDashboard(): void {
       navigate('/login');
     });
 
-  document.querySelector<HTMLButtonElement>('#btn-lihat-semua')
+  document.querySelector<HTMLButtonElement>('#btn-tambah-dashboard')
+    ?.addEventListener('click', () => navigate('/anggota/tambah'));
+
+  document.querySelector<HTMLButtonElement>('#btn-lihat-anggota')
     ?.addEventListener('click', () => navigate('/anggota'));
 
   loadDashboardData();
@@ -53,39 +57,11 @@ async function loadDashboardData(): Promise<void> {
     statsContainer.innerHTML = `
       <div class="stat-card">
         <div class="stat-number">${data.length}</div>
-        <div class="stat-label">Total Anggota</div>
-      </div>
-    `;
-
-    // Render anggota terbaru (max 3)
-    const anggotaPreview = document.querySelector<HTMLDivElement>('#anggota-preview')!;
-    if (data.length === 0) {
-      anggotaPreview.innerHTML = '<p class="empty">Belum ada anggota. Tambahkan anggota baru untuk memulai.</p>';
-      return;
-    }
-
-    const recent = data.slice(0, 3);
-    anggotaPreview.innerHTML = `
-      <div style="display: grid; gap: 0.75rem;">
-        ${recent.map((a) => `
-          <div class="anggota-card">
-            <div class="anggota-name">${esc(a.nama)}</div>
-            <div class="anggota-info">
-              <span>📍 ${esc(a.alamat) || '-'}</span>
-              <span>📱 ${esc(a.no_telepon) || '-'}</span>
-            </div>
-          </div>
-        `).join('')}
+        <div class="stat-label">Total Anggota Terdata</div>
       </div>
     `;
   } catch (e) {
     const statsContainer = document.querySelector<HTMLDivElement>('#stats-container')!;
-    statsContainer.innerHTML = `<p class="error">Gagal memuat data: ${(e as Error).message}</p>`;
+    statsContainer.innerHTML = `<p class="error">Data belum bisa dimuat. Periksa koneksi internet lalu coba lagi.<br><small>${(e as Error).message}</small></p>`;
   }
-}
-
-function esc(s: string): string {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
 }

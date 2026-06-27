@@ -5,6 +5,7 @@ import { loginPage, mountLogin } from './pages/login';
 import { dashboardPage, mountDashboard } from './pages/dashboard';
 import { anggotaListPage, mountAnggotaList } from './pages/anggota/list';
 import { anggotaFormPage, mountAnggotaForm } from './pages/anggota/form';
+import { consumeFlashToast } from './ui';
 
 function renderNav(): string {
   if (!isAuthenticated()) return '';
@@ -13,7 +14,7 @@ function renderNav(): string {
     <nav class="bottom-nav">
       <button class="nav-item ${hash === '/dashboard' ? 'active' : ''}" id="nav-home">
         <span class="nav-icon">🏠</span>
-        <span>Home</span>
+        <span>Beranda</span>
       </button>
       <button class="nav-item ${hash === '/anggota' || hash.startsWith('/anggota/') ? 'active' : ''}" id="nav-anggota">
         <span class="nav-icon">👥</span>
@@ -70,6 +71,7 @@ const patchedInitRouter = () => {
       app.insertAdjacentHTML('afterend', nav);
       mountNav();
     }
+    consumeFlashToast();
   }, 0);
 };
 
@@ -83,6 +85,7 @@ window.addEventListener('hashchange', () => {
     app.insertAdjacentHTML('afterend', nav);
     mountNav();
   }
+  setTimeout(() => consumeFlashToast(), 0);
 });
 
 patchedInitRouter();

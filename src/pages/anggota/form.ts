@@ -1,13 +1,17 @@
 import { getAnggotaById, createAnggota, updateAnggota } from '../../api/anggota';
 import { logout } from '../../auth';
 import { navigate } from '../../router';
+import { setFlashToast } from '../../ui';
 
 export function anggotaFormPage(isEdit: boolean): string {
   return `
     <header>
       <div class="header-row">
-        <h1>${isEdit ? 'Edit' : 'Tambah'} Anggota</h1>
-        <button id="logout-btn" class="icon-btn" title="Logout">🚪</button>
+        <div>
+          <p class="header-kicker">${isEdit ? 'Perbarui Data' : 'Data Baru'}</p>
+          <h1>${isEdit ? 'Edit' : 'Tambah'} Anggota</h1>
+        </div>
+        <button id="logout-btn" class="logout-btn" title="Keluar">Keluar</button>
       </div>
     </header>
 
@@ -22,11 +26,11 @@ export function anggotaFormPage(isEdit: boolean): string {
             type="text" 
             id="field-nama" 
             class="form-input"
-            placeholder="Masukkan nama lengkap"
+            placeholder="Contoh: Ibu Siti Aminah"
             required 
             autocomplete="off"
           />
-          <small class="form-hint">Wajib diisi</small>
+          <small class="form-hint">Wajib diisi agar mudah dicari di daftar anggota.</small>
         </div>
 
         <!-- Alamat -->
@@ -40,7 +44,7 @@ export function anggotaFormPage(isEdit: boolean): string {
             rows="3"
             placeholder="Jalan Widoro 4, Sembungharjo RT 03/RW 02"
           >Jalan Widoro 4, Sembungharjo RT 03/RW 02</textarea>
-          <small class="form-hint">Opsional, edit sesuai kebutuhan</small>
+          <small class="form-hint">Sudah terisi alamat umum, silakan ubah atau lengkapi nomor rumah.</small>
         </div>
 
         <!-- No. Telepon -->
@@ -56,7 +60,7 @@ export function anggotaFormPage(isEdit: boolean): string {
             autocomplete="off"
             pattern="[0-9+]*"
           />
-          <small class="form-hint">Opsional, format: 08xxxxxxxxx</small>
+          <small class="form-hint">Opsional. Isi bila anggota memiliki nomor yang bisa dihubungi.</small>
         </div>
 
         <!-- Error Message -->
@@ -65,10 +69,10 @@ export function anggotaFormPage(isEdit: boolean): string {
         <!-- Action Buttons -->
         <div class="form-actions-stack">
           <button type="submit" id="btn-simpan" class="btn-primary btn-large">
-            💾 Simpan
+            💾 Simpan Data
           </button>
           <button type="button" id="btn-batal" class="btn-secondary btn-large">
-            ❌ Batal
+            Batal
           </button>
         </div>
       </form>
@@ -116,14 +120,14 @@ export async function mountAnggotaForm(): Promise<void> {
 
       // Validation
       if (!nama) {
-        errorEl.textContent = '❌ Nama lengkap wajib diisi';
+        errorEl.textContent = 'Nama anggota wajib diisi.';
         errorEl.classList.remove('hidden');
         (document.querySelector<HTMLInputElement>('#field-nama'))?.focus();
         return;
       }
 
       if (nama.length < 3) {
-        errorEl.textContent = '❌ Nama minimal 3 karakter';
+        errorEl.textContent = 'Nama minimal 3 huruf.';
         errorEl.classList.remove('hidden');
         (document.querySelector<HTMLInputElement>('#field-nama'))?.focus();
         return;
@@ -131,7 +135,7 @@ export async function mountAnggotaForm(): Promise<void> {
 
       // Disable submit button to prevent double click
       submitBtn.disabled = true;
-      submitBtn.textContent = '⏳ Menyimpan...';
+      submitBtn.textContent = 'Menyimpan...';
 
       try {
         if (isEdit && id) {
@@ -139,10 +143,11 @@ export async function mountAnggotaForm(): Promise<void> {
         } else {
           await createAnggota({ nama, alamat, no_telepon });
         }
+        setFlashToast(isEdit ? 'Data anggota berhasil diperbarui.' : 'Anggota baru berhasil disimpan.');
         navigate('/anggota');
       } catch (err) {
         submitBtn.disabled = false;
-        submitBtn.textContent = '💾 Simpan';
+        submitBtn.textContent = '💾 Simpan Data';
         const error = err as Error;
         console.error('Form submit error:', {
           message: error.message,
@@ -154,7 +159,7 @@ export async function mountAnggotaForm(): Promise<void> {
           isEdit,
           id
         });
-        errorEl.textContent = `❌ Gagal menyimpan: ${error.message}`;
+        errorEl.textContent = `Gagal menyimpan data. ${error.message}`;
         errorEl.classList.remove('hidden');
       }
     });

@@ -5,12 +5,13 @@ export function loginPage(): string {
   return `
     <div class="login-container">
       <div class="login-card">
+        <p class="header-kicker">PKK Sembungharjo</p>
         <h1>Aplikasi Kegiatan PKK</h1>
-        <p class="login-sub">Login untuk melanjutkan</p>
+        <p class="login-sub">Masuk untuk mengelola data anggota dengan mudah.</p>
         <form id="login-form">
           <label>
             Username
-            <input type="text" id="username" value="admin" autocomplete="username" />
+            <input type="text" id="username" value="admin" autocomplete="username" inputmode="text" />
           </label>
           <label>
             Password
@@ -35,7 +36,7 @@ export function mountLogin(): void {
     const password = passInput?.value ?? '';
 
     if (!username || !password) {
-      errorEl!.textContent = 'Isi username dan password';
+      errorEl!.textContent = 'Mohon isi username dan password.';
       errorEl!.classList.remove('hidden');
       return;
     }
@@ -44,7 +45,7 @@ export function mountLogin(): void {
       errorEl!.classList.add('hidden');
       navigate('/dashboard');
     } else {
-      errorEl!.textContent = 'Username atau password tidak sesuai';
+      errorEl!.textContent = 'Username atau password belum sesuai.';
       errorEl!.classList.remove('hidden');
     }
   });

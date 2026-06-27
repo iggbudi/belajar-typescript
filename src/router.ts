@@ -8,7 +8,8 @@ export function route(path: string, fn: PageFn): void {
 
 function render(): void {
   const hash = location.hash.slice(1) || '/dashboard';
-  const fn = routes.get(hash);
+  const path = hash.split('?')[0];
+  const fn = routes.get(path);
   const app = document.querySelector<HTMLDivElement>('#app')!;
   if (fn) app.innerHTML = fn();
 }

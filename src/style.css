@@ -83,3 +83,83 @@ footer {
   padding: 1rem 0;
 }
 code { background: #eee; padding: 1px 4px; border-radius: 4px; font-size: .85em; }
+
+/* ── Login ── */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 80dvh;
+}
+
+.login-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 2rem 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  text-align: center;
+}
+
+.login-card h1 { margin-bottom: .25rem; }
+
+.login-sub {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.login-card label {
+  display: block;
+  text-align: left;
+  font-size: .85rem;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: .75rem;
+}
+
+.login-card input {
+  display: block;
+  width: 100%;
+  margin-top: .3rem;
+  padding: .6rem .75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color .15s;
+}
+
+.login-card input:focus {
+  border-color: var(--ts-blue);
+  box-shadow: 0 0 0 3px rgba(49, 120, 198, .15);
+}
+
+.login-card button {
+  width: 100%;
+  margin-top: .5rem;
+  padding: .65rem;
+  font-size: 1rem;
+}
+
+.error {
+  color: #d32f2f;
+  font-size: .85rem;
+  margin-bottom: .5rem;
+}
+
+.hidden { display: none; }
+
+/* ── Dashboard header row ── */
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--ts-blue);
+  border: 1.5px solid var(--ts-blue);
+  font-size: .8rem;
+  padding: .3rem .75rem;
+}
+.btn-outline:hover { background: var(--ts-blue); color: #fff; }

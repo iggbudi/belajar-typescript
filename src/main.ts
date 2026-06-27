@@ -1,31 +1,42 @@
 import './style.css';
+import { route, initRouter, navigate } from './router';
+import { isAuthenticated } from './auth';
+import { loginPage, mountLogin } from './pages/login';
+import { dashboardPage, mountDashboard } from './pages/dashboard';
 
-// ── Hello World ──
-const greeting: string = "Hello, World!";
-console.log(greeting);
-document.querySelector<HTMLHeadingElement>('#greeting')!.textContent = greeting;
+// ── Guard ──
+route('/login', () => {
+  if (isAuthenticated()) {
+    navigate('/dashboard');
+    return '';
+  }
+  return loginPage();
+});
 
-// ── Function ──
-function greet(name: string): void {
-  const msg = `Hello, ${name}!`;
-  console.log(msg);
-  document.querySelector<HTMLParagraphElement>('#greet-output')!.textContent = msg;
-}
+route('/dashboard', () => {
+  if (!isAuthenticated()) {
+    navigate('/login');
+    return '';
+  }
+  return dashboardPage();
+});
 
-document.querySelector<HTMLButtonElement>('#greet-btn')
-  ?.addEventListener('click', () => greet('TypeScript'));
+// ── Init ──
+initRouter();
 
-// ── Interface & Object ──
-interface Person {
-  name: string;
-  age: number;
-}
+// ── Mount hooks after first render ──
+const observer = new MutationObserver(() => {
+  const hash = location.hash.slice(1) || '/dashboard';
 
-const person: Person = {
-  name: "Budi",
-  age: 25,
-};
+  if (hash === '/login' && document.querySelector('#login-form')) {
+    mountLogin();
+    observer.disconnect();
+  }
 
-console.log(`My name is ${person.name}, I'm ${person.age} years old`);
-document.querySelector<HTMLPreElement>('#person-output')!.textContent =
-  JSON.stringify(person, null, 2);
+  if (hash === '/dashboard' && document.querySelector('#greeting')) {
+    mountDashboard();
+    observer.disconnect();
+  }
+});
+
+observer.observe(document.querySelector<HTMLDivElement>('#app')!, { childList: true, subtree: true });

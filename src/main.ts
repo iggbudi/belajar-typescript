@@ -8,6 +8,7 @@ import { anggotaFormPage, mountAnggotaForm } from './pages/anggota/form';
 import { kegiatanListPage, mountKegiatanList } from './pages/kegiatan/list';
 import { kegiatanFormPage, mountKegiatanForm } from './pages/kegiatan/form';
 import { absensiPage, mountAbsensiPage } from './pages/kegiatan/absensi';
+import { settingsPage, mountSettings } from './pages/settings';
 import { consumeFlashToast, updateNavBadge } from './ui';
 import { getAnggota } from './api/anggota';
 import { getStatsKegiatan } from './api/kegiatan';
@@ -20,6 +21,7 @@ function renderNav(): string {
   
   const isAnggotaActive = hash === '/anggota' || hash.startsWith('/anggota/');
   const isKegiatanActive = hash === '/kegiatan' || hash.startsWith('/kegiatan/');
+  const isSettingsActive = hash === '/settings';
   
   return `
     <nav class="bottom-nav">
@@ -37,6 +39,10 @@ function renderNav(): string {
         <span>Kegiatan</span>
         <span class="nav-badge hidden" id="nav-badge-kegiatan">0</span>
       </button>
+      <button class="nav-item ${isSettingsActive ? 'active' : ''}" id="nav-settings">
+        <span class="nav-icon">⚙️</span>
+        <span>Setting</span>
+      </button>
     </nav>
   `;
 }
@@ -48,6 +54,8 @@ function mountNav(): void {
     ?.addEventListener('click', () => navigate('/anggota'));
   document.querySelector<HTMLButtonElement>('#nav-kegiatan')
     ?.addEventListener('click', () => navigate('/kegiatan'));
+  document.querySelector<HTMLButtonElement>('#nav-settings')
+    ?.addEventListener('click', () => navigate('/settings'));
 
   // Load badge counts
   loadBadgeCounts();
@@ -101,6 +109,9 @@ route('/kegiatan', guard(kegiatanListPage, mountKegiatanList));
 route('/kegiatan/tambah', guard(() => kegiatanFormPage(false), mountKegiatanForm));
 route('/kegiatan/edit', guard(() => kegiatanFormPage(true), mountKegiatanForm));
 route('/kegiatan/absensi', guard(absensiPage, mountAbsensiPage));
+
+// Settings route
+route('/settings', guard(settingsPage, mountSettings));
 
 // ── Init ──
 const originalInitRouter = initRouter;

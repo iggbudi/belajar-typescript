@@ -437,13 +437,14 @@ th, td { padding: .75rem .5rem; border-bottom: 1px solid var(--line); text-align
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: .18rem;
+  gap: .12rem;
   background: transparent;
   color: var(--muted);
-  font-size: .78rem;
+  font-size: .72rem;
   font-weight: 900;
   transition: var(--transition);
   position: relative;
+  padding: .5rem .25rem;
 }
 .nav-item:hover { color: var(--primary); }
 .nav-icon { font-size: 1.35rem; line-height: 1; }
@@ -480,4 +481,111 @@ th, td { padding: .75rem .5rem; border-bottom: 1px solid var(--line); text-align
   body { padding-top: 1.5rem; }
   .quick-actions { grid-template-columns: 1fr 1fr; }
   .stats-row { gap: 1rem; }
+}
+
+/* ═══ Settings ═══ */
+.settings-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 1.15rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-soft);
+}
+.settings-card-info { border-left: 6px solid var(--accent); }
+.settings-card-header {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: 1rem;
+}
+.settings-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+.settings-card-header h2 {
+  font-size: 1.05rem;
+  margin-bottom: .15rem;
+}
+.settings-subtitle {
+  font-size: .85rem;
+  color: var(--muted);
+}
+.iuran-display {
+  text-align: center;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, var(--primary-soft), #f0f7f2);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+}
+.iuran-amount {
+  font-size: clamp(1.75rem, 8vw, 2.25rem);
+  font-weight: 950;
+  color: var(--primary-dark);
+  line-height: 1.1;
+}
+.iuran-label {
+  font-size: .88rem;
+  color: var(--primary);
+  font-weight: 700;
+  margin-top: .25rem;
+}
+.iuran-updated {
+  font-size: .78rem;
+  color: var(--muted);
+  margin-top: .5rem;
+}
+.iuran-form-group {
+  margin-top: 1rem;
+}
+.iuran-input {
+  font-size: 1.25rem !important;
+  font-weight: 800;
+  text-align: center;
+  padding: 1rem !important;
+}
+.iuran-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: .75rem;
+  margin-bottom: 1rem;
+}
+.btn-quick-amount {
+  flex: 1;
+  min-width: calc(50% - .25rem);
+  background: var(--surface-muted);
+  color: var(--primary-dark);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: .55rem .5rem;
+  font-size: .82rem;
+  font-weight: 800;
+  min-height: 38px;
+  transition: var(--transition);
+}
+.btn-quick-amount:hover { background: var(--primary-soft); }
+.btn-quick-amount:active { transform: scale(.96); }
+
+.settings-info-list {
+  display: grid;
+  gap: .6rem;
+}
+.settings-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .5rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.settings-info-item:last-child { border-bottom: none; }
+.settings-info-label {
+  color: var(--muted);
+  font-size: .88rem;
+  font-weight: 700;
+}
+.settings-info-value {
+  color: var(--primary-dark);
+  font-weight: 800;
+  font-size: .92rem;
 }

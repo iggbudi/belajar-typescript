@@ -47,4 +47,10 @@ Setiap kali ada progress tambahkan dibagian akhir
   - Dashboard: tambah stats kegiatan (total, bulan ini) dan quick actions kegiatan.
   - CSS: style kegiatan card, absensi buttons, absensi summary.
   - Build berhasil (JS 119.76 KB, CSS 16.04 KB).
+- 2026-06-27: **Menu Setting & Uang Iuran** - Tambah halaman pengaturan:
+  - Bottom nav: tambah menu Setting (⚙️) di posisi paling kanan.
+  - Halaman Setting: Uang Iuran (atur nominal per anggota), info aplikasi.
+  - Form ubah iuran: input nominal, tombol quick amount (10rb, 15rb, 20rb, 25rb, 50rb), validasi.
+  - Data tersimpan di localStorage, tampilkan terakhir diubah.
+  - Build berhasil (JS 122.16 KB, CSS 15.82 KB).
 - 2026-06-27: Tambah flash toast berbasis `sessionStorage` agar pesan sukses simpan/edit tetap muncul setelah navigasi kembali ke daftar anggota. Update `src/ui.ts`, `src/main.ts`, dan `src/pages/anggota/form.ts`. Build berhasil (JS 94.00 KB, CSS 7.20 KB).

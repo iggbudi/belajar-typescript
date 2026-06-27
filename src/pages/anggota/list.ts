@@ -1,6 +1,5 @@
 import { getAnggota, deleteAnggota } from '../../api/anggota';
 import { navigate } from '../../router';
-
 import { logout } from '../../auth';
 
 export function anggotaListPage(): string {
@@ -43,17 +42,15 @@ export async function mountAnggotaList(): Promise<void> {
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Nama</th><th>Alamat</th><th>No. Telepon</th><th class="th-aksi">Aksi</th></tr>
+            <tr><th>Nama</th><th class="th-aksi">Aksi</th></tr>
           </thead>
           <tbody>
             ${data.map((a) => `
               <tr>
                 <td>${esc(a.nama)}</td>
-                <td>${esc(a.alamat)}</td>
-                <td>${esc(a.no_telepon)}</td>
                 <td class="td-aksi">
-                  <button class="btn-sm btn-edit" data-id="${a.id}">Edit</button>
-                  <button class="btn-sm btn-hapus" data-id="${a.id}">Hapus</button>
+                  <button class="btn-sm btn-edit" data-id="${a.id}">✏️ Edit</button>
+                  <button class="btn-sm btn-hapus" data-id="${a.id}">🗑️ Hapus</button>
                 </td>
               </tr>
             `).join('')}
@@ -62,17 +59,30 @@ export async function mountAnggotaList(): Promise<void> {
       </div>
     `;
 
-    container.querySelectorAll<HTMLButtonElement>('.btn-edit').forEach((btn) =>
-      btn.addEventListener('click', () => navigate(`/anggota/edit?id=${btn.dataset.id}`))
-    );
+    // Mount event listeners after rendering
+    setTimeout(() => {
+      container.querySelectorAll<HTMLButtonElement>('.btn-edit').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          console.log('Edit button clicked, navigating to:', `/anggota/edit?id=${id}`);
+          navigate(`/anggota/edit?id=${id}`);
+        });
+      });
 
-    container.querySelectorAll<HTMLButtonElement>('.btn-hapus').forEach((btn) =>
-      btn.addEventListener('click', async () => {
-        if (!confirm('Hapus anggota ini?')) return;
-        await deleteAnggota(Number(btn.dataset.id));
-        mountAnggotaList();
-      })
-    );
+      container.querySelectorAll<HTMLButtonElement>('.btn-hapus').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = Number(btn.dataset.id);
+          if (!confirm('Hapus anggota ini?')) return;
+          try {
+            await deleteAnggota(id);
+            console.log('Delete success, reloading list');
+            mountAnggotaList();
+          } catch (err) {
+            alert(`Gagal hapus: ${(err as Error).message}`);
+          }
+        });
+      });
+    }, 0);
   } catch (e) {
     container.innerHTML = `<p class="error">Gagal memuat data: ${(e as Error).message}</p>`;
   }

@@ -7,9 +7,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'Hello TypeScript PWA',
-        short_name: 'TS PWA',
-        description: 'Belajar TypeScript sebagai Progressive Web App',
+        name: 'Aplikasi Kegiatan PKK',
+        short_name: 'PKK App',
+        description: 'Aplikasi untuk mengelola kegiatan PKK',
         theme_color: '#3178c6',
         background_color: '#f5f5f5',
         display: 'standalone',

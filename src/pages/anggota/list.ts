@@ -1,15 +1,20 @@
 import { getAnggota, deleteAnggota } from '../../api/anggota';
 import { navigate } from '../../router';
 
+import { logout } from '../../auth';
+
 export function anggotaListPage(): string {
   return `
     <header>
       <div class="header-row">
         <h1>Anggota PKK</h1>
-        <button id="btn-tambah" class="btn-primary">+ Tambah</button>
+        <button id="logout-btn" class="icon-btn" title="Logout">🚪</button>
       </div>
       <p>Daftar anggota PKK</p>
     </header>
+    <div style="margin-bottom: 1rem;">
+      <button id="btn-tambah" class="btn-primary">+ Tambah Anggota</button>
+    </div>
     <div id="anggota-list">
       <p class="loading">Memuat data...</p>
     </div>
@@ -17,6 +22,12 @@ export function anggotaListPage(): string {
 }
 
 export async function mountAnggotaList(): Promise<void> {
+  document.querySelector<HTMLButtonElement>('#logout-btn')
+    ?.addEventListener('click', () => {
+      logout();
+      navigate('/login');
+    });
+
   document.querySelector<HTMLButtonElement>('#btn-tambah')
     ?.addEventListener('click', () => navigate('/anggota/tambah'));
 

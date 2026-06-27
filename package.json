@@ -1,7 +1,7 @@
 {
-  "name": "helloworld",
+  "name": "aplikasi-kegiatan-pkk",
   "version": "1.0.0",
-  "description": "Belajar TypeScript PWA",
+  "description": "Aplikasi Kegiatan PKK",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,5 +15,8 @@
     "typescript": "^5.4.5",
     "vite": "^6.3.0",
     "vite-plugin-pwa": "^0.21.0"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.4"
   }
 }

@@ -5,8 +5,8 @@ export function loginPage(): string {
   return `
     <div class="login-container">
       <div class="login-card">
-        <h1>Hello TypeScript</h1>
-        <p class="login-sub">Login to continue</p>
+        <h1>Aplikasi Kegiatan PKK</h1>
+        <p class="login-sub">Login untuk melanjutkan</p>
         <form id="login-form">
           <label>
             Username
@@ -17,7 +17,7 @@ export function loginPage(): string {
             <input type="password" id="password" autocomplete="current-password" />
           </label>
           <p id="login-error" class="error hidden"></p>
-          <button type="submit">Login</button>
+          <button type="submit">Masuk</button>
         </form>
       </div>
     </div>
@@ -44,7 +44,7 @@ export function mountLogin(): void {
       errorEl!.classList.add('hidden');
       navigate('/dashboard');
     } else {
-      errorEl!.textContent = 'Username atau password salah';
+      errorEl!.textContent = 'Username atau password tidak sesuai';
       errorEl!.classList.remove('hidden');
     }
   });

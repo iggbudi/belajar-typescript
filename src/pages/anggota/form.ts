@@ -1,29 +1,75 @@
 import { getAnggotaById, createAnggota, updateAnggota } from '../../api/anggota';
+import { logout } from '../../auth';
 import { navigate } from '../../router';
 
 export function anggotaFormPage(isEdit: boolean): string {
   return `
     <header>
-      <h1>${isEdit ? 'Edit' : 'Tambah'} Anggota</h1>
+      <div class="header-row">
+        <h1>${isEdit ? 'Edit' : 'Tambah'} Anggota</h1>
+        <button id="logout-btn" class="icon-btn" title="Logout">🚪</button>
+      </div>
     </header>
-    <div class="card">
+
+    <div class="form-card">
       <form id="anggota-form">
-        <label>
-          Nama <span class="req">*</span>
-          <input type="text" id="field-nama" required autocomplete="off" />
-        </label>
-        <label>
-          Alamat
-          <textarea id="field-alamat" rows="2"></textarea>
-        </label>
-        <label>
-          No. Telepon
-          <input type="tel" id="field-telepon" autocomplete="off" />
-        </label>
-        <p id="form-error" class="error hidden"></p>
-        <div class="form-actions">
-          <button type="button" id="btn-batal" class="btn-outline">Batal</button>
-          <button type="submit" id="btn-simpan" class="btn-primary">Simpan</button>
+        <!-- Nama -->
+        <div class="form-group">
+          <label for="field-nama" class="form-label">
+            Nama Lengkap <span class="req">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="field-nama" 
+            class="form-input"
+            placeholder="Masukkan nama lengkap"
+            required 
+            autocomplete="off"
+          />
+          <small class="form-hint">Wajib diisi</small>
+        </div>
+
+        <!-- Alamat -->
+        <div class="form-group">
+          <label for="field-alamat" class="form-label">
+            Alamat
+          </label>
+          <textarea 
+            id="field-alamat" 
+            class="form-textarea"
+            rows="3"
+            placeholder="Jalan Widoro 4, Sembungharjo RT 03/RW 02"
+          >Jalan Widoro 4, Sembungharjo RT 03/RW 02</textarea>
+          <small class="form-hint">Opsional, edit sesuai kebutuhan</small>
+        </div>
+
+        <!-- No. Telepon -->
+        <div class="form-group">
+          <label for="field-telepon" class="form-label">
+            No. Telepon
+          </label>
+          <input 
+            type="tel" 
+            id="field-telepon" 
+            class="form-input"
+            placeholder="08xxxxxxxxx"
+            autocomplete="off"
+            pattern="[0-9+]*"
+          />
+          <small class="form-hint">Opsional, format: 08xxxxxxxxx</small>
+        </div>
+
+        <!-- Error Message -->
+        <p id="form-error" class="form-error hidden"></p>
+
+        <!-- Action Buttons -->
+        <div class="form-actions-stack">
+          <button type="submit" id="btn-simpan" class="btn-primary btn-large">
+            💾 Simpan
+          </button>
+          <button type="button" id="btn-batal" class="btn-secondary btn-large">
+            ❌ Batal
+          </button>
         </div>
       </form>
     </div>
@@ -31,10 +77,17 @@ export function anggotaFormPage(isEdit: boolean): string {
 }
 
 export async function mountAnggotaForm(): Promise<void> {
+  document.querySelector<HTMLButtonElement>('#logout-btn')
+    ?.addEventListener('click', () => {
+      logout();
+      navigate('/login');
+    });
+
   const params = new URLSearchParams(location.hash.split('?')[1] ?? '');
   const id = params.get('id') ? Number(params.get('id')) : null;
   const isEdit = id !== null;
 
+  // Load data if edit
   if (isEdit && id) {
     const a = await getAnggotaById(id);
     if (a) {
@@ -44,9 +97,11 @@ export async function mountAnggotaForm(): Promise<void> {
     }
   }
 
+  // Cancel button
   document.querySelector<HTMLButtonElement>('#btn-batal')
     ?.addEventListener('click', () => navigate('/anggota'));
 
+  // Form submit
   document.querySelector<HTMLFormElement>('#anggota-form')
     ?.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -54,12 +109,29 @@ export async function mountAnggotaForm(): Promise<void> {
       const alamat = (document.querySelector<HTMLTextAreaElement>('#field-alamat')!).value.trim();
       const no_telepon = (document.querySelector<HTMLInputElement>('#field-telepon')!).value.trim();
       const errorEl = document.querySelector<HTMLParagraphElement>('#form-error')!;
+      const submitBtn = document.querySelector<HTMLButtonElement>('#btn-simpan')!;
 
+      // Clear error
+      errorEl.classList.add('hidden');
+
+      // Validation
       if (!nama) {
-        errorEl.textContent = 'Nama wajib diisi';
+        errorEl.textContent = '❌ Nama lengkap wajib diisi';
         errorEl.classList.remove('hidden');
+        (document.querySelector<HTMLInputElement>('#field-nama'))?.focus();
         return;
       }
+
+      if (nama.length < 3) {
+        errorEl.textContent = '❌ Nama minimal 3 karakter';
+        errorEl.classList.remove('hidden');
+        (document.querySelector<HTMLInputElement>('#field-nama'))?.focus();
+        return;
+      }
+
+      // Disable submit button to prevent double click
+      submitBtn.disabled = true;
+      submitBtn.textContent = '⏳ Menyimpan...';
 
       try {
         if (isEdit && id) {
@@ -69,10 +141,24 @@ export async function mountAnggotaForm(): Promise<void> {
         }
         navigate('/anggota');
       } catch (err) {
-        errorEl.textContent = (err as Error).message;
+        submitBtn.disabled = false;
+        submitBtn.textContent = '💾 Simpan';
+        const error = err as Error;
+        console.error('Form submit error:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name,
+          nama,
+          alamat,
+          no_telepon,
+          isEdit,
+          id
+        });
+        errorEl.textContent = `❌ Gagal menyimpan: ${error.message}`;
         errorEl.classList.remove('hidden');
       }
     });
 
+  // Auto focus on first field
   setTimeout(() => (document.querySelector<HTMLInputElement>('#field-nama'))?.focus(), 100);
 }

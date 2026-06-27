@@ -27,7 +27,7 @@ Setiap kali ada progress tambahkan dibagian akhir
 - 2026-06-27: Lanjut polish sprint UI/UX. Tambah `src/ui.ts` untuk toast dan custom confirm dialog, ganti confirm browser saat hapus anggota, tambah toast sukses/gagal simpan/hapus, dan fix router agar route dengan query string seperti `#/anggota/edit?id=N` cocok ke `/anggota/edit`. Build berhasil (JS 93.69 KB, CSS 7.20 KB).
 - 2026-06-27: Tambah flash toast berbasis `sessionStorage` agar pesan sukses simpan/edit tetap muncul setelah navigasi kembali ke daftar anggota. Update `src/ui.ts`, `src/main.ts`, dan `src/pages/anggota/form.ts`. Build berhasil (JS 94.00 KB, CSS 7.20 KB).
 - 2026-06-27: **Major UI/UX Refactor** - Enhance seluruh tampilan PWA PKK:
-  - Dashboard: tambah greeting personal (Pagi/Siang/Sore/Malam), multiple stat cards (Total, Ada Telepon, Belum Lengkap), recent members section, skeleton loading.
+  - Dashboard: tambah greeting personal (Pagi/Siang/Sore/Malam), multiple stat cards (Total Anggota, Total Kegiatan, Kegiatan Bulan Ini, Ada Telepon, Belum Lengkap), skeleton loading.
   - Bottom Nav: tambah badge counter anggota, active indicator bar, backdrop blur.
   - Skeleton Loading: implementasi skeleton shimmer untuk card, stats, dan recent members.
   - Pull-to-refresh: tambah gesture tarik untuk segarkan di halaman anggota.

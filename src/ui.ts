@@ -211,8 +211,8 @@ export function initPullToRefresh(options: PullToRefreshOptions): () => void {
 
 // ── Badge Counter ──
 
-export function updateNavBadge(count: number): void {
-  const badge = document.querySelector('.nav-badge');
+export function updateNavBadge(count: number, type: 'anggota' | 'kegiatan' = 'anggota'): void {
+  const badge = document.querySelector<HTMLSpanElement>(`#nav-badge-${type}`);
   if (badge) {
     badge.textContent = count > 99 ? '99+' : String(count);
     badge.classList.toggle('hidden', count === 0);

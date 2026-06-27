@@ -37,4 +37,14 @@ Setiap kali ada progress tambahkan dibagian akhir
   - Form Anggota: tambah emoji di label, konsisten dengan desain baru.
   - Updated CSS variables: tambah shadow-hover, transition global, improved border-radius.
   - Build berhasil (JS 100.23 KB, CSS 14.67 KB tanpa PWA plugin karena terser issue).
+- 2026-06-27: **Fitur CRUD Kegiatan & Absensi** - Implementasi manajemen kegiatan PKK:
+  - Database: tabel `kegiatan` (judul, tanggal, lokasi, deskripsi) dan `absensi` (kegiatan_id, anggota_id, status).
+  - API: CRUD kegiatan + absensi dengan auto-init tables.
+  - Halaman Daftar Kegiatan: card list dengan search, tombol absensi/edit/hapus.
+  - Form Tambah/Edit Kegiatan: judul, tanggal, lokasi, deskripsi dengan validasi.
+  - Halaman Absensi: pilih anggota, tandai hadir/tidak_hadir/izin, summary stats, bulk save.
+  - Bottom Nav: tambah menu Kegiatan dengan badge counter.
+  - Dashboard: tambah stats kegiatan (total, bulan ini) dan quick actions kegiatan.
+  - CSS: style kegiatan card, absensi buttons, absensi summary.
+  - Build berhasil (JS 119.76 KB, CSS 16.04 KB).
 - 2026-06-27: Tambah flash toast berbasis `sessionStorage` agar pesan sukses simpan/edit tetap muncul setelah navigasi kembali ke daftar anggota. Update `src/ui.ts`, `src/main.ts`, dan `src/pages/anggota/form.ts`. Build berhasil (JS 94.00 KB, CSS 7.20 KB).

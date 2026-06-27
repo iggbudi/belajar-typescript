@@ -1,6 +1,7 @@
 import { logout } from '../auth';
 import { navigate } from '../router';
 import { getAnggota, type Anggota } from '../api/anggota';
+import { getStatsKegiatan } from '../api/kegiatan';
 import { skeletonStats, skeletonRecent, getGreeting } from '../ui';
 
 export function dashboardPage(): string {
@@ -22,10 +23,12 @@ export function dashboardPage(): string {
 
     <section class="hero-card">
       <h2>📌 Aksi Cepat</h2>
-      <p>Tambah atau lihat data anggota PKK</p>
+      <p>Kelola data anggota dan kegiatan PKK</p>
       <div class="quick-actions">
         <button id="btn-tambah-dashboard" class="btn-primary">➕ Tambah Anggota</button>
-        <button id="btn-lihat-anggota" class="btn-secondary">📋 Lihat Daftar</button>
+        <button id="btn-lihat-anggota" class="btn-secondary">👥 Lihat Anggota</button>
+        <button id="btn-tambah-kegiatan" class="btn-primary">📋 Tambah Kegiatan</button>
+        <button id="btn-lihat-kegiatan" class="btn-secondary">📅 Lihat Kegiatan</button>
       </div>
     </section>
 
@@ -58,17 +61,26 @@ export function mountDashboard(): void {
   document.querySelector<HTMLButtonElement>('#btn-lihat-anggota')
     ?.addEventListener('click', () => navigate('/anggota'));
 
+  document.querySelector<HTMLButtonElement>('#btn-tambah-kegiatan')
+    ?.addEventListener('click', () => navigate('/kegiatan/tambah'));
+
+  document.querySelector<HTMLButtonElement>('#btn-lihat-kegiatan')
+    ?.addEventListener('click', () => navigate('/kegiatan'));
+
   document.querySelector<HTMLButtonElement>('#btn-lihat-semua')
-    ?.addEventListener('click', () => navigate('/anggota'));
+    ?.addEventListener('click', () => navigate('/kegiatan'));
 
   loadDashboardData();
 }
 
 async function loadDashboardData(): Promise<void> {
   try {
-    const data = await getAnggota();
+    const [data, statsKegiatan] = await Promise.all([
+      getAnggota(),
+      getStatsKegiatan()
+    ]);
 
-    renderStats(data);
+    renderStats(data, statsKegiatan);
     renderRecentMembers(data);
   } catch (e) {
     const statsContainer = document.querySelector<HTMLDivElement>('#stats-container')!;
@@ -86,7 +98,7 @@ async function loadDashboardData(): Promise<void> {
   }
 }
 
-function renderStats(data: Anggota[]): void {
+function renderStats(data: Anggota[], statsKegiatan: { total: number; bulanIni: number; totalHadir: number }): void {
   const statsContainer = document.querySelector<HTMLDivElement>('#stats-container')!;
   const total = data.length;
   const withPhone = data.filter(a => a.no_telepon && a.no_telepon.trim()).length;
@@ -96,6 +108,18 @@ function renderStats(data: Anggota[]): void {
     <div class="stat-card">
       <div class="stat-number">${total}</div>
       <div class="stat-label">Total Anggota</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card-secondary">
+        <div class="stat-icon">📅</div>
+        <div class="stat-number">${statsKegiatan.total}</div>
+        <div class="stat-label">Total Kegiatan</div>
+      </div>
+      <div class="stat-card-secondary">
+        <div class="stat-icon">📋</div>
+        <div class="stat-number">${statsKegiatan.bulanIni}</div>
+        <div class="stat-label">Kegiatan Bulan Ini</div>
+      </div>
     </div>
     <div class="stats-row">
       <div class="stat-card-secondary">

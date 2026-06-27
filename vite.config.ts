@@ -23,13 +23,6 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg}'],
         maximumFileSizeToCacheInBytes: 200000,
-        runtimeCaching: [
-          {
-            urlPattern: /^https?:\/\/.*\/favicon\.svg$/,
-            handler: 'CacheFirst',
-            options: { cacheName: 'icons', expiration: { maxEntries: 10 } },
-          },
-        ],
       },
     }),
   ],

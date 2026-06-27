@@ -10,8 +10,8 @@ export default defineConfig({
         name: 'Aplikasi Kegiatan PKK',
         short_name: 'PKK App',
         description: 'Aplikasi untuk mengelola kegiatan PKK',
-        theme_color: '#3178c6',
-        background_color: '#f5f5f5',
+        theme_color: '#2f6b4f',
+        background_color: '#fbf4e8',
         display: 'standalone',
         scope: '/',
         start_url: '/',
@@ -22,6 +22,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg}'],
+        maximumFileSizeToCacheInBytes: 200000,
         runtimeCaching: [
           {
             urlPattern: /^https?:\/\/.*\/favicon\.svg$/,

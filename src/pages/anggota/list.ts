@@ -1,9 +1,10 @@
 import { getAnggota, deleteAnggota, type Anggota } from '../../api/anggota';
 import { navigate } from '../../router';
 import { logout } from '../../auth';
-import { confirmDialog, showToast } from '../../ui';
+import { confirmDialog, showToast, skeletonCard, initPullToRefresh } from '../../ui';
 
 let anggotaCache: Anggota[] = [];
+let cleanupPull: (() => void) | null = null;
 
 export function anggotaListPage(): string {
   return `
@@ -13,22 +14,25 @@ export function anggotaListPage(): string {
           <p class="header-kicker">Data Anggota</p>
           <h1>Anggota PKK</h1>
         </div>
-        <button id="logout-btn" class="logout-btn" title="Keluar">Keluar</button>
+        <button id="logout-btn" class="logout-btn" title="Keluar">🚪 Keluar</button>
       </div>
     </header>
 
     <div class="toolbar">
-      <button id="btn-tambah" class="btn-primary">+ Tambah Anggota</button>
-      <input id="search-anggota" class="search-input" type="search" placeholder="Cari nama anggota..." autocomplete="off" />
+      <button id="btn-tambah" class="btn-primary">➕ Tambah Anggota</button>
+      <input id="search-anggota" class="search-input" type="search" placeholder="🔍 Cari nama anggota..." autocomplete="off" />
     </div>
 
     <div id="anggota-list">
-      <p class="loading">Memuat data anggota...</p>
+      ${skeletonCard(3)}
     </div>
   `;
 }
 
 export async function mountAnggotaList(): Promise<void> {
+  // Cleanup previous pull-to-refresh if any
+  cleanupPull?.();
+
   document.querySelector<HTMLButtonElement>('#logout-btn')
     ?.addEventListener('click', () => {
       logout();
@@ -46,9 +50,30 @@ export async function mountAnggotaList(): Promise<void> {
   try {
     anggotaCache = await getAnggota();
     renderAnggotaList(searchInput?.value ?? '');
+
+    // Initialize pull-to-refresh after data is loaded
+    cleanupPull = initPullToRefresh({
+      container,
+      onRefresh: async () => {
+        anggotaCache = await getAnggota();
+        renderAnggotaList(searchInput?.value ?? '');
+      }
+    });
   } catch (e) {
-    container.innerHTML = `<p class="error">Data anggota belum bisa dimuat. Periksa koneksi internet lalu coba lagi.<br><small>${(e as Error).message}</small></p>`;
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-title">Gagal Memuat Data</div>
+        <div class="empty-text">Periksa koneksi internet lalu coba lagi.</div>
+        <p class="error" style="margin:0;font-size:.82rem"><small>${(e as Error).message}</small></p>
+      </div>
+    `;
   }
+}
+
+export function unmountAnggotaList(): void {
+  cleanupPull?.();
+  cleanupPull = null;
 }
 
 function renderAnggotaList(keyword: string): void {
@@ -61,12 +86,24 @@ function renderAnggotaList(keyword: string): void {
     : anggotaCache;
 
   if (anggotaCache.length === 0) {
-    container.innerHTML = '<p class="empty">Belum ada anggota.<br>Tekan tombol <strong>Tambah Anggota</strong> untuk mulai.</p>';
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <div class="empty-title">Belum Ada Anggota</div>
+        <div class="empty-text">Tekan tombol <strong>Tambah Anggota</strong> untuk mulai mengelola data PKK.</div>
+      </div>
+    `;
     return;
   }
 
   if (data.length === 0) {
-    container.innerHTML = '<p class="empty">Nama anggota tidak ditemukan.</p>';
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">Tidak Ditemukan</div>
+        <div class="empty-text">Anggota dengan nama "<strong>${esc(keyword)}</strong>" tidak ada di daftar.</div>
+      </div>
+    `;
     return;
   }
 
@@ -77,7 +114,7 @@ function renderAnggotaList(keyword: string): void {
           <div class="anggota-name">${esc(a.nama)}</div>
           <div class="anggota-info">
             ${a.alamat ? `<span>📍 ${esc(shortText(a.alamat, 72))}</span>` : ''}
-            ${a.no_telepon ? `<span>☎️ ${esc(a.no_telepon)}</span>` : '<span>☎️ No. telepon belum diisi</span>'}
+            ${a.no_telepon ? `<span>📱 ${esc(a.no_telepon)}</span>` : '<span>📵 No. telepon belum diisi</span>'}
           </div>
           <div class="anggota-actions">
             <button class="btn-sm btn-edit" data-id="${a.id}">✏️ Edit</button>
@@ -97,23 +134,23 @@ function renderAnggotaList(keyword: string): void {
       const id = Number(btn.dataset.id);
       const name = btn.dataset.name ?? 'anggota ini';
       const ok = await confirmDialog({
-        title: 'Hapus anggota?',
-        message: `Data ${name} akan dihapus dari daftar anggota.`,
+        title: '🗑️ Hapus Anggota?',
+        message: `Data "${name}" akan dihapus permanen dari daftar anggota.`,
         confirmText: 'Ya, Hapus',
         cancelText: 'Batal'
       });
       if (!ok) return;
 
       btn.disabled = true;
-      btn.textContent = 'Menghapus...';
+      btn.textContent = '⏳ Menghapus...';
 
       try {
         await deleteAnggota(id);
         anggotaCache = anggotaCache.filter((a) => a.id !== id);
         renderAnggotaList(document.querySelector<HTMLInputElement>('#search-anggota')?.value ?? '');
-        showToast('Data anggota berhasil dihapus.');
+        showToast('✓ Data anggota berhasil dihapus.');
       } catch (err) {
-        showToast(`Gagal hapus: ${(err as Error).message}`, 'error');
+        showToast('✗ Gagal hapus: ' + (err as Error).message, 'error');
         btn.disabled = false;
         btn.textContent = '🗑️ Hapus';
       }

@@ -8,10 +8,10 @@ export function anggotaFormPage(isEdit: boolean): string {
     <header>
       <div class="header-row">
         <div>
-          <p class="header-kicker">${isEdit ? 'Perbarui Data' : 'Data Baru'}</p>
+          <p class="header-kicker">${isEdit ? '✏️ Perbarui Data' : '➕ Data Baru'}</p>
           <h1>${isEdit ? 'Edit' : 'Tambah'} Anggota</h1>
         </div>
-        <button id="logout-btn" class="logout-btn" title="Keluar">Keluar</button>
+        <button id="logout-btn" class="logout-btn" title="Keluar">🚪 Keluar</button>
       </div>
     </header>
 
@@ -20,7 +20,7 @@ export function anggotaFormPage(isEdit: boolean): string {
         <!-- Nama -->
         <div class="form-group">
           <label for="field-nama" class="form-label">
-            Nama Lengkap <span class="req">*</span>
+            👤 Nama Lengkap <span class="req">*</span>
           </label>
           <input 
             type="text" 
@@ -36,7 +36,7 @@ export function anggotaFormPage(isEdit: boolean): string {
         <!-- Alamat -->
         <div class="form-group">
           <label for="field-alamat" class="form-label">
-            Alamat
+            📍 Alamat
           </label>
           <textarea 
             id="field-alamat" 
@@ -50,7 +50,7 @@ export function anggotaFormPage(isEdit: boolean): string {
         <!-- No. Telepon -->
         <div class="form-group">
           <label for="field-telepon" class="form-label">
-            No. Telepon
+            📱 No. Telepon
           </label>
           <input 
             type="tel" 
@@ -72,7 +72,7 @@ export function anggotaFormPage(isEdit: boolean): string {
             💾 Simpan Data
           </button>
           <button type="button" id="btn-batal" class="btn-secondary btn-large">
-            Batal
+            ← Batal
           </button>
         </div>
       </form>
@@ -93,11 +93,15 @@ export async function mountAnggotaForm(): Promise<void> {
 
   // Load data if edit
   if (isEdit && id) {
-    const a = await getAnggotaById(id);
-    if (a) {
-      (document.querySelector<HTMLInputElement>('#field-nama')!).value = a.nama;
-      (document.querySelector<HTMLTextAreaElement>('#field-alamat')!).value = a.alamat;
-      (document.querySelector<HTMLInputElement>('#field-telepon')!).value = a.no_telepon;
+    try {
+      const a = await getAnggotaById(id);
+      if (a) {
+        (document.querySelector<HTMLInputElement>('#field-nama')!).value = a.nama;
+        (document.querySelector<HTMLTextAreaElement>('#field-alamat')!).value = a.alamat;
+        (document.querySelector<HTMLInputElement>('#field-telepon')!).value = a.no_telepon;
+      }
+    } catch (err) {
+      console.error('Failed to load anggota:', err);
     }
   }
 
@@ -120,14 +124,14 @@ export async function mountAnggotaForm(): Promise<void> {
 
       // Validation
       if (!nama) {
-        errorEl.textContent = 'Nama anggota wajib diisi.';
+        errorEl.textContent = '⚠️ Nama anggota wajib diisi.';
         errorEl.classList.remove('hidden');
         (document.querySelector<HTMLInputElement>('#field-nama'))?.focus();
         return;
       }
 
       if (nama.length < 3) {
-        errorEl.textContent = 'Nama minimal 3 huruf.';
+        errorEl.textContent = '⚠️ Nama minimal 3 huruf.';
         errorEl.classList.remove('hidden');
         (document.querySelector<HTMLInputElement>('#field-nama'))?.focus();
         return;
@@ -135,7 +139,7 @@ export async function mountAnggotaForm(): Promise<void> {
 
       // Disable submit button to prevent double click
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Menyimpan...';
+      submitBtn.textContent = '⏳ Menyimpan...';
 
       try {
         if (isEdit && id) {
@@ -143,7 +147,7 @@ export async function mountAnggotaForm(): Promise<void> {
         } else {
           await createAnggota({ nama, alamat, no_telepon });
         }
-        setFlashToast(isEdit ? 'Data anggota berhasil diperbarui.' : 'Anggota baru berhasil disimpan.');
+        setFlashToast(isEdit ? '✓ Data anggota berhasil diperbarui.' : '✓ Anggota baru berhasil disimpan.');
         navigate('/anggota');
       } catch (err) {
         submitBtn.disabled = false;
@@ -159,7 +163,7 @@ export async function mountAnggotaForm(): Promise<void> {
           isEdit,
           id
         });
-        errorEl.textContent = `Gagal menyimpan data. ${error.message}`;
+        errorEl.textContent = `❌ Gagal menyimpan data. ${error.message}`;
         errorEl.classList.remove('hidden');
       }
     });

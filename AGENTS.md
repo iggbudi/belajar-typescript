@@ -26,3 +26,15 @@ Setiap kali ada progress tambahkan dibagian akhir
 - 2026-06-27: Sprint UI/UX refactor tahap utama selesai. Update design system global dengan palet hangat PKK, bottom nav label Beranda, login ramah pengguna, dashboard dengan quick actions, daftar anggota card list + search lokal, form tambah/edit lebih jelas. Build berhasil (JS 92.19 KB, CSS 6.26 KB).
 - 2026-06-27: Lanjut polish sprint UI/UX. Tambah `src/ui.ts` untuk toast dan custom confirm dialog, ganti confirm browser saat hapus anggota, tambah toast sukses/gagal simpan/hapus, dan fix router agar route dengan query string seperti `#/anggota/edit?id=N` cocok ke `/anggota/edit`. Build berhasil (JS 93.69 KB, CSS 7.20 KB).
 - 2026-06-27: Tambah flash toast berbasis `sessionStorage` agar pesan sukses simpan/edit tetap muncul setelah navigasi kembali ke daftar anggota. Update `src/ui.ts`, `src/main.ts`, dan `src/pages/anggota/form.ts`. Build berhasil (JS 94.00 KB, CSS 7.20 KB).
+- 2026-06-27: **Major UI/UX Refactor** - Enhance seluruh tampilan PWA PKK:
+  - Dashboard: tambah greeting personal (Pagi/Siang/Sore/Malam), multiple stat cards (Total, Ada Telepon, Belum Lengkap), recent members section, skeleton loading.
+  - Bottom Nav: tambah badge counter anggota, active indicator bar, backdrop blur.
+  - Skeleton Loading: implementasi skeleton shimmer untuk card, stats, dan recent members.
+  - Pull-to-refresh: tambah gesture tarik untuk segarkan di halaman anggota.
+  - Empty State: desain empty state dengan icon dan pesan yang lebih ramah.
+  - Card Hover/Tap Effect: tambah animasi hover dan active state untuk semua card.
+  - Login Page: desain ulang dengan emoji header, button state saat submit, footer hint.
+  - Form Anggota: tambah emoji di label, konsisten dengan desain baru.
+  - Updated CSS variables: tambah shadow-hover, transition global, improved border-radius.
+  - Build berhasil (JS 100.23 KB, CSS 14.67 KB tanpa PWA plugin karena terser issue).
+- 2026-06-27: Tambah flash toast berbasis `sessionStorage` agar pesan sukses simpan/edit tetap muncul setelah navigasi kembali ke daftar anggota. Update `src/ui.ts`, `src/main.ts`, dan `src/pages/anggota/form.ts`. Build berhasil (JS 94.00 KB, CSS 7.20 KB).

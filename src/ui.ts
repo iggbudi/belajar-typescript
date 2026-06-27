@@ -60,6 +60,165 @@ export function confirmDialog(options: { title: string; message: string; confirm
   });
 }
 
+// ── Skeleton Loading Helpers ──
+
+export function skeletonCard(count: number = 3): string {
+  return `
+    <div class="skeleton-list">
+      ${Array(count).fill('').map(() => `
+        <div class="skeleton-card">
+          <div class="skeleton-line skeleton-title"></div>
+          <div class="skeleton-line skeleton-text"></div>
+          <div class="skeleton-line skeleton-text-short"></div>
+          <div class="skeleton-actions">
+            <div class="skeleton-btn"></div>
+            <div class="skeleton-btn"></div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+export function skeletonStats(): string {
+  return `
+    <div class="skeleton-stats">
+      <div class="skeleton-stat-card">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-line skeleton-text"></div>
+      </div>
+      <div class="skeleton-stat-card">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-line skeleton-text"></div>
+      </div>
+      <div class="skeleton-stat-card">
+        <div class="skeleton-circle"></div>
+        <div class="skeleton-line skeleton-text"></div>
+      </div>
+    </div>
+  `;
+}
+
+export function skeletonRecent(): string {
+  return `
+    <div class="skeleton-recent">
+      ${Array(2).fill('').map(() => `
+        <div class="skeleton-recent-item">
+          <div class="skeleton-avatar"></div>
+          <div class="skeleton-recent-info">
+            <div class="skeleton-line skeleton-text"></div>
+            <div class="skeleton-line skeleton-text-short"></div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// ── Time Greeting ──
+
+export function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 11) return 'Selamat Pagi';
+  if (hour < 15) return 'Selamat Siang';
+  if (hour < 18) return 'Selamat Sore';
+  return 'Selamat Malam';
+}
+
+// ── Pull to Refresh ──
+
+export interface PullToRefreshOptions {
+  container: HTMLElement;
+  onRefresh: () => Promise<void>;
+  threshold?: number;
+}
+
+export function initPullToRefresh(options: PullToRefreshOptions): () => void {
+  const { container, onRefresh, threshold = 80 } = options;
+  let startY = 0;
+  let pulling = false;
+  let refreshing = false;
+
+  const indicator = document.createElement('div');
+  indicator.className = 'pull-indicator';
+  indicator.innerHTML = '<div class="pull-spinner"></div><span>Tarik untuk segarkan</span>';
+  container.prepend(indicator);
+
+  const onTouchStart = (e: TouchEvent) => {
+    if (refreshing || window.scrollY > 0) return;
+    startY = e.touches[0].clientY;
+    pulling = true;
+  };
+
+  const onTouchMove = (e: TouchEvent) => {
+    if (!pulling || refreshing) return;
+    const diff = e.touches[0].clientY - startY;
+    if (diff > 0 && diff < threshold * 1.5) {
+      const progress = Math.min(diff / threshold, 1);
+      indicator.style.transform = `translateY(${diff * 0.5}px)`;
+      indicator.style.opacity = `${progress}`;
+      indicator.classList.toggle('pull-ready', progress >= 1);
+    }
+  };
+
+  const onTouchEnd = async () => {
+    if (!pulling || refreshing) return;
+    pulling = false;
+
+    const currentTransform = indicator.style.transform;
+    const match = currentTransform.match(/translateY\((\d+)px\)/);
+    const distance = match ? parseInt(match[1]) : 0;
+
+    if (distance >= threshold * 0.8) {
+      refreshing = true;
+      indicator.style.transform = 'translateY(40px)';
+      indicator.innerHTML = '<div class="pull-spinner spinning"></div><span>Menyegarkan data...</span>';
+      indicator.classList.add('pull-refreshing');
+
+      try {
+        await onRefresh();
+        indicator.innerHTML = '<span>✓ Berhasil diperbarui</span>';
+        indicator.classList.add('pull-success');
+      } catch {
+        indicator.innerHTML = '<span>✗ Gagal memperbarui</span>';
+        indicator.classList.add('pull-error');
+      }
+
+      setTimeout(() => {
+        indicator.style.transform = '';
+        indicator.style.opacity = '';
+        indicator.classList.remove('pull-ready', 'pull-refreshing', 'pull-success', 'pull-error');
+        refreshing = false;
+      }, 800);
+    } else {
+      indicator.style.transform = '';
+      indicator.style.opacity = '';
+      indicator.classList.remove('pull-ready');
+    }
+  };
+
+  container.addEventListener('touchstart', onTouchStart, { passive: true });
+  container.addEventListener('touchmove', onTouchMove, { passive: true });
+  container.addEventListener('touchend', onTouchEnd);
+
+  return () => {
+    container.removeEventListener('touchstart', onTouchStart);
+    container.removeEventListener('touchmove', onTouchMove);
+    container.removeEventListener('touchend', onTouchEnd);
+    indicator.remove();
+  };
+}
+
+// ── Badge Counter ──
+
+export function updateNavBadge(count: number): void {
+  const badge = document.querySelector('.nav-badge');
+  if (badge) {
+    badge.textContent = count > 99 ? '99+' : String(count);
+    badge.classList.toggle('hidden', count === 0);
+  }
+}
+
 function esc(s: string): string {
   const d = document.createElement('div');
   d.textContent = s;

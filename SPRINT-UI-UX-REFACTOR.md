@@ -208,15 +208,26 @@ Acceptance Criteria:
 
 Sprint dianggap selesai jika:
 
-- `npm run build` berhasil.
-- Login berfungsi.
-- Dashboard memuat statistik.
-- Tambah anggota berfungsi.
-- Edit anggota berfungsi.
-- Hapus anggota berfungsi.
-- Search anggota berfungsi.
-- UI nyaman di mobile width sekitar 360px.
-- Progress dicatat di `AGENTS.md`.
+- ✅ `npm run build` berhasil.
+- ✅ Login berfungsi.
+- ✅ Dashboard memuat statistik (dengan greeting personal, multiple stat cards, recent members).
+- ✅ Tambah anggota berfungsi.
+- ✅ Edit anggota berfungsi.
+- ✅ Hapus anggota berfungsi.
+- ✅ Search anggota berfungsi.
+- ✅ UI nyaman di mobile width sekitar 360px.
+- ✅ Progress dicatat di `AGENTS.md`.
+
+### Bonus Features (Implemented)
+
+- ✅ Skeleton loading untuk stats, cards, dan recent members.
+- ✅ Pull-to-refresh gesture di halaman anggota.
+- ✅ Bottom nav badge counter untuk jumlah anggota.
+- ✅ Greeting personal berdasarkan waktu (Pagi/Siang/Sore/Malam).
+- ✅ Recent members section di dashboard.
+- ✅ Enhanced empty state dengan icon dan pesan ramah.
+- ✅ Card hover/tap effects untuk better touch feedback.
+- ✅ Login page dengan emoji header dan better UX.
 
 ## Risiko
 

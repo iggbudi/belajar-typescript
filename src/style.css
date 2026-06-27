@@ -1,0 +1,85 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ts-blue: #3178c6;
+  --bg: #f5f5f5;
+  --card: #fff;
+  --radius: 12px;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: #1a1a1a;
+  line-height: 1.6;
+  padding: 1rem;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+}
+
+#app {
+  max-width: 480px;
+  width: 100%;
+}
+
+header {
+  text-align: center;
+  padding: 2rem 0;
+}
+
+h1 { font-size: 2rem; color: var(--ts-blue); }
+
+.badge {
+  display: inline-block;
+  background: var(--ts-blue);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 99px;
+  vertical-align: middle;
+  font-weight: 600;
+}
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+h2 { font-size: 1.1rem; margin-bottom: .75rem; color: #333; }
+
+button {
+  background: var(--ts-blue);
+  color: #fff;
+  border: none;
+  padding: .5rem 1.25rem;
+  border-radius: 8px;
+  font-size: .95rem;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+button:hover { opacity: .85; }
+
+.output {
+  margin-top: .75rem;
+  padding: .75rem;
+  background: #f0f4f8;
+  border-radius: 6px;
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: .9rem;
+  min-height: 1.5em;
+  white-space: pre-wrap;
+}
+
+pre { margin: 0; }
+
+footer {
+  text-align: center;
+  font-size: .8rem;
+  color: #888;
+  padding: 1rem 0;
+}
+code { background: #eee; padding: 1px 4px; border-radius: 4px; font-size: .85em; }

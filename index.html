@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#3178c6" />
+  <meta name="description" content="Belajar TypeScript PWA" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/favicon.svg" />
+  <title>Hello TypeScript PWA</title>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1 id="greeting"></h1>
+      <p>Belajar TypeScript <span class="badge">PWA</span></p>
+    </header>
+
+    <section class="card">
+      <h2>Function</h2>
+      <button id="greet-btn">Greet TypeScript</button>
+      <p id="greet-output" class="output"></p>
+    </section>
+
+    <section class="card">
+      <h2>Interface &amp; Object</h2>
+      <pre id="person-output" class="output"></pre>
+    </section>
+
+    <footer>
+      <p>Check console for <code>console.log</code> output</p>
+    </footer>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

@@ -420,37 +420,27 @@ button:disabled { opacity: .65; cursor: not-allowed; }
 .absensi-card { border-left-color: var(--primary); }
 .absensi-info { flex: 1; }
 .absensi-buttons {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: .4rem;
+  display: flex;
   margin-top: .75rem;
 }
-.btn-absensi-option {
+.btn-hadir {
+  flex: 1;
   background: var(--surface-muted);
   color: var(--muted);
-  border: 2px solid transparent;
-  border-radius: var(--radius-sm);
-  padding: .5rem .35rem;
-  font-size: .78rem;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: .65rem 1rem;
+  font-size: .92rem;
   font-weight: 800;
-  min-height: 40px;
+  min-height: 44px;
   transition: var(--transition);
 }
-.btn-absensi-option:active { transform: scale(.95); }
-.btn-absensi-option.active[data-status="hadir"] {
+.btn-hadir:active { transform: scale(.97); }
+.btn-hadir.active {
   background: #d4edda;
   color: #155724;
   border-color: #28a745;
-}
-.btn-absensi-option.active[data-status="tidak_hadir"] {
-  background: #f8d7da;
-  color: #721c24;
-  border-color: #dc3545;
-}
-.btn-absensi-option.active[data-status="izin"] {
-  background: #fff3cd;
-  color: #856404;
-  border-color: #ffc107;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, .25);
 }
 
 /* Legacy table fallback */

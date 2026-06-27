@@ -42,7 +42,7 @@ Setiap kali ada progress tambahkan dibagian akhir
   - API: CRUD kegiatan + absensi dengan auto-init tables.
   - Halaman Daftar Kegiatan: card list dengan search, tombol absensi/edit/hapus.
   - Form Tambah/Edit Kegiatan: judul, tanggal, lokasi, deskripsi dengan validasi.
-  - Halaman Absensi: pilih anggota, tandai hadir/tidak_hadir/izin, summary stats, bulk save.
+  - Halaman Absensi: tombol hadir saja (klik untuk tandai hadir, klik lagi untuk batal), otomatis absent jika tidak diklik, summary stats hadir/tidak hadir, bulk save.
   - Bottom Nav: tambah menu Kegiatan dengan badge counter.
   - Dashboard: tambah stats kegiatan (total, bulan ini) dan quick actions kegiatan.
   - CSS: style kegiatan card, absensi buttons, absensi summary.

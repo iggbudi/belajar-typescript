@@ -40,11 +40,7 @@ export function absensiPage(): string {
           <div class="stat-number" id="count-tidak-hadir">0</div>
           <div class="stat-label">Tidak Hadir</div>
         </div>
-        <div class="stat-card-secondary">
-          <div class="stat-icon">📝</div>
-          <div class="stat-number" id="count-izin">0</div>
-          <div class="stat-label">Izin</div>
-        </div>
+
       </div>
     </div>
 
@@ -155,14 +151,8 @@ function renderAnggotaList(): void {
             </div>
           </div>
           <div class="absensi-buttons">
-            <button class="btn-absensi-option ${getStatusClass(a.status, 'hadir')}" data-status="hadir" data-index="${index}">
-              ✅ Hadir
-            </button>
-            <button class="btn-absensi-option ${getStatusClass(a.status, 'tidak_hadir')}" data-status="tidak_hadir" data-index="${index}">
-              ❌ Absen
-            </button>
-            <button class="btn-absensi-option ${getStatusClass(a.status, 'izin')}" data-status="izin" data-index="${index}">
-              📝 Izin
+            <button class="btn-hadir ${a.status === 'hadir' ? 'active' : ''}" data-status="hadir" data-index="${index}">
+              ${a.status === 'hadir' ? '✅ Hadir' : '☐ Tandai Hadir'}
             </button>
           </div>
         </article>
@@ -171,28 +161,22 @@ function renderAnggotaList(): void {
   `;
 
   // Add event listeners to absensi buttons
-  container.querySelectorAll<HTMLButtonElement>('.btn-absensi-option').forEach((btn) => {
+  container.querySelectorAll<HTMLButtonElement>('.btn-hadir').forEach((btn) => {
     btn.addEventListener('click', () => {
       const index = Number(btn.dataset.index);
-      const status = btn.dataset.status as 'hadir' | 'tidak_hadir' | 'izin';
+      const currentStatus = anggotaData[index].status;
       
-      // Update local data
-      anggotaData[index].status = status;
+      // Toggle: if already hadir, set to tidak_hadir; otherwise set to hadir
+      const newStatus = currentStatus === 'hadir' ? 'tidak_hadir' : 'hadir';
+      anggotaData[index].status = newStatus;
       
       // Update UI
-      const card = btn.closest('.absensi-card');
-      if (card) {
-        card.querySelectorAll('.btn-absensi-option').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      }
+      btn.classList.toggle('active', newStatus === 'hadir');
+      btn.textContent = newStatus === 'hadir' ? '✅ Hadir' : '☐ Tandai Hadir';
       
       updateSummary();
     });
   });
-}
-
-function getStatusClass(currentStatus: string | undefined, targetStatus: string): string {
-  return currentStatus === targetStatus ? 'active' : '';
 }
 
 function updateSummary(): void {
@@ -200,12 +184,10 @@ function updateSummary(): void {
   if (!summaryEl) return;
 
   const hadir = anggotaData.filter(a => a.status === 'hadir').length;
-  const tidakHadir = anggotaData.filter(a => a.status === 'tidak_hadir').length;
-  const izin = anggotaData.filter(a => a.status === 'izin').length;
+  const tidakHadir = anggotaData.filter(a => a.status !== 'hadir').length;
 
   document.querySelector<HTMLDivElement>('#count-hadir')!.textContent = String(hadir);
   document.querySelector<HTMLDivElement>('#count-tidak-hadir')!.textContent = String(tidakHadir);
-  document.querySelector<HTMLDivElement>('#count-izin')!.textContent = String(izin);
   
   summaryEl.style.display = 'block';
 }

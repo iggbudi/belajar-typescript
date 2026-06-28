@@ -1,10 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_ADMIN_USERNAME: string;
-  readonly VITE_ADMIN_PASSWORD: string;
-  readonly VITE_TURSO_URL: string;
-  readonly VITE_TURSO_TOKEN: string;
+  // No client-side env vars needed — all secrets are server-side (Vercel env)
 }
 
 interface ImportMeta {

@@ -12,11 +12,9 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@vercel/node": "^5.8.21",
     "typescript": "^5.4.5",
     "vite": "^6.3.0",
     "vite-plugin-pwa": "^0.21.0"
-  },
-  "dependencies": {
-    "@libsql/client": "^0.17.4"
   }
 }

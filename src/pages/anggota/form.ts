@@ -1,17 +1,22 @@
 import { getAnggotaById, createAnggota, updateAnggota } from '../../api/anggota';
-import { logout } from '../../auth';
 import { navigate } from '../../router';
-import { setFlashToast } from '../../ui';
+import { setFlashToast, invalidateBadgeCache, markDirty, clearDirty, confirmIfDirty } from '../../ui';
 
-export function anggotaFormPage(isEdit: boolean): string {
+// Store params from route (passed via guard)
+let _formId: string | undefined;
+let _formIsEdit: boolean;
+
+export function anggotaFormPage(isEdit: boolean, id?: string): string {
+  _formIsEdit = isEdit;
+  _formId = id;
+  const isEditLabel = isEdit;
   return `
     <header>
       <div class="header-row">
         <div>
-          <p class="header-kicker">${isEdit ? '✏️ Perbarui Data' : '➕ Data Baru'}</p>
-          <h1>${isEdit ? 'Edit' : 'Tambah'} Anggota</h1>
+          <p class="header-kicker">${isEditLabel ? '✏️ Perbarui Data' : '➕ Data Baru'}</p>
+          <h1>${isEditLabel ? 'Edit' : 'Tambah'} Anggota</h1>
         </div>
-        <button id="logout-btn" class="logout-btn" title="Keluar">🚪 Keluar</button>
       </div>
     </header>
 
@@ -81,20 +86,13 @@ export function anggotaFormPage(isEdit: boolean): string {
 }
 
 export async function mountAnggotaForm(): Promise<void> {
-  document.querySelector<HTMLButtonElement>('#logout-btn')
-    ?.addEventListener('click', () => {
-      logout();
-      navigate('/login');
-    });
-
-  const params = new URLSearchParams(location.hash.split('?')[1] ?? '');
-  const id = params.get('id') ? Number(params.get('id')) : null;
-  const isEdit = id !== null;
+  const isEdit = _formIsEdit;
+  const numId = isEdit ? Number(_formId) : null;
 
   // Load data if edit
-  if (isEdit && id) {
+  if (isEdit && numId) {
     try {
-      const a = await getAnggotaById(id);
+      const a = await getAnggotaById(numId);
       if (a) {
         (document.querySelector<HTMLInputElement>('#field-nama')!).value = a.nama;
         (document.querySelector<HTMLTextAreaElement>('#field-alamat')!).value = a.alamat;
@@ -105,9 +103,15 @@ export async function mountAnggotaForm(): Promise<void> {
     }
   }
 
+  // Track dirty state
+  const formEl = document.querySelector<HTMLFormElement>('#anggota-form');
+  formEl?.addEventListener('input', () => markDirty());
+
   // Cancel button
   document.querySelector<HTMLButtonElement>('#btn-batal')
-    ?.addEventListener('click', () => navigate('/anggota'));
+    ?.addEventListener('click', async () => {
+      if (await confirmIfDirty()) navigate('/anggota');
+    });
 
   // Form submit
   document.querySelector<HTMLFormElement>('#anggota-form')
@@ -142,12 +146,14 @@ export async function mountAnggotaForm(): Promise<void> {
       submitBtn.textContent = '⏳ Menyimpan...';
 
       try {
-        if (isEdit && id) {
-          await updateAnggota(id, { nama, alamat, no_telepon });
+        if (isEdit && numId) {
+          await updateAnggota(numId, { nama, alamat, no_telepon });
         } else {
           await createAnggota({ nama, alamat, no_telepon });
         }
         setFlashToast(isEdit ? '✓ Data anggota berhasil diperbarui.' : '✓ Anggota baru berhasil disimpan.');
+        invalidateBadgeCache();
+        clearDirty();
         navigate('/anggota');
       } catch (err) {
         submitBtn.disabled = false;
@@ -161,7 +167,7 @@ export async function mountAnggotaForm(): Promise<void> {
           alamat,
           no_telepon,
           isEdit,
-          id
+          formId: _formId
         });
         errorEl.textContent = `❌ Gagal menyimpan data. ${error.message}`;
         errorEl.classList.remove('hidden');

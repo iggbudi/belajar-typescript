@@ -1,7 +1,6 @@
 import { getAnggota, deleteAnggota, type Anggota } from '../../api/anggota';
 import { navigate } from '../../router';
-import { logout } from '../../auth';
-import { confirmDialog, showToast, skeletonCard, initPullToRefresh } from '../../ui';
+import { confirmDialog, showToast, skeletonCard, initPullToRefresh, shortText, esc, invalidateBadgeCache, highlightMatch } from '../../ui';
 
 let anggotaCache: Anggota[] = [];
 let cleanupPull: (() => void) | null = null;
@@ -14,12 +13,14 @@ export function anggotaListPage(): string {
           <p class="header-kicker">Data Anggota</p>
           <h1>Anggota PKK</h1>
         </div>
-        <button id="logout-btn" class="logout-btn" title="Keluar">🚪 Keluar</button>
       </div>
     </header>
 
     <div class="toolbar">
-      <button id="btn-tambah" class="btn-primary">➕ Tambah Anggota</button>
+      <div class="toolbar-row">
+        <button id="btn-tambah" class="btn-primary">➕ Tambah</button>
+        <button id="btn-export" class="btn-secondary btn-sm">📋 Export CSV</button>
+      </div>
       <input id="search-anggota" class="search-input" type="search" placeholder="🔍 Cari nama anggota..." autocomplete="off" />
     </div>
 
@@ -33,11 +34,8 @@ export async function mountAnggotaList(): Promise<void> {
   // Cleanup previous pull-to-refresh if any
   cleanupPull?.();
 
-  document.querySelector<HTMLButtonElement>('#logout-btn')
-    ?.addEventListener('click', () => {
-      logout();
-      navigate('/login');
-    });
+  document.querySelector<HTMLButtonElement>('#btn-export')
+    ?.addEventListener('click', () => exportCSV());
 
   document.querySelector<HTMLButtonElement>('#btn-tambah')
     ?.addEventListener('click', () => navigate('/anggota/tambah'));
@@ -111,7 +109,7 @@ function renderAnggotaList(keyword: string): void {
     <div class="anggota-list">
       ${data.map((a) => `
         <article class="anggota-card">
-          <div class="anggota-name">${esc(a.nama)}</div>
+          <div class="anggota-name">${q ? highlightMatch(a.nama, keyword) : esc(a.nama)}</div>
           <div class="anggota-info">
             ${a.alamat ? `<span>📍 ${esc(shortText(a.alamat, 72))}</span>` : ''}
             ${a.no_telepon ? `<span>📱 ${esc(a.no_telepon)}</span>` : '<span>📵 No. telepon belum diisi</span>'}
@@ -126,7 +124,7 @@ function renderAnggotaList(keyword: string): void {
   `;
 
   container.querySelectorAll<HTMLButtonElement>('.btn-edit').forEach((btn) => {
-    btn.addEventListener('click', () => navigate(`/anggota/edit?id=${btn.dataset.id}`));
+    btn.addEventListener('click', () => navigate(`/anggota/edit/${btn.dataset.id}`));
   });
 
   container.querySelectorAll<HTMLButtonElement>('.btn-hapus').forEach((btn) => {
@@ -147,6 +145,7 @@ function renderAnggotaList(keyword: string): void {
       try {
         await deleteAnggota(id);
         anggotaCache = anggotaCache.filter((a) => a.id !== id);
+        invalidateBadgeCache();
         renderAnggotaList(document.querySelector<HTMLInputElement>('#search-anggota')?.value ?? '');
         showToast('✓ Data anggota berhasil dihapus.');
       } catch (err) {
@@ -158,12 +157,24 @@ function renderAnggotaList(keyword: string): void {
   });
 }
 
-function shortText(s: string, max: number): string {
-  return s.length > max ? `${s.slice(0, max - 1)}…` : s;
+function exportCSV(): void {
+  if (anggotaCache.length === 0) {
+    showToast('⚠️ Tidak ada data untuk di-export.', 'error');
+    return;
+  }
+  const header = 'Nama,Alamat,No Telepon';
+  const rows = anggotaCache.map(a =>
+    `"${a.nama.replace(/"/g, '""')}","${a.alamat.replace(/"/g, '""')}","${a.no_telepon}"`
+  );
+  const csv = [header, ...rows].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `anggota-pkk-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+  showToast(`✓ ${anggotaCache.length} data anggota berhasil di-export.`);
 }
 
-function esc(s: string): string {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
+

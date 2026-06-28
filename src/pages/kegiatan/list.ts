@@ -1,9 +1,9 @@
 import { getKegiatan, deleteKegiatan, type Kegiatan } from '../../api/kegiatan';
 import { navigate } from '../../router';
-import { logout } from '../../auth';
-import { confirmDialog, showToast, skeletonCard } from '../../ui';
+import { confirmDialog, showToast, skeletonCard, shortText, formatDate, esc, invalidateBadgeCache, initPullToRefresh, highlightMatch } from '../../ui';
 
 let kegiatanCache: Kegiatan[] = [];
+let cleanupPull: (() => void) | null = null;
 
 export function kegiatanListPage(): string {
   return `
@@ -13,7 +13,6 @@ export function kegiatanListPage(): string {
           <p class="header-kicker">📋 Daftar Kegiatan</p>
           <h1>Kegiatan PKK</h1>
         </div>
-        <button id="logout-btn" class="logout-btn" title="Keluar">🚪 Keluar</button>
       </div>
     </header>
 
@@ -28,13 +27,13 @@ export function kegiatanListPage(): string {
   `;
 }
 
-export async function mountKegiatanList(): Promise<void> {
-  document.querySelector<HTMLButtonElement>('#logout-btn')
-    ?.addEventListener('click', () => {
-      logout();
-      navigate('/login');
-    });
+export function unmountKegiatanList(): void {
+  cleanupPull?.();
+  cleanupPull = null;
+}
 
+export async function mountKegiatanList(): Promise<void> {
+  cleanupPull?.();
   document.querySelector<HTMLButtonElement>('#btn-tambah')
     ?.addEventListener('click', () => navigate('/kegiatan/tambah'));
 
@@ -46,6 +45,14 @@ export async function mountKegiatanList(): Promise<void> {
   try {
     kegiatanCache = await getKegiatan();
     renderKegiatanList(searchInput?.value ?? '');
+
+    cleanupPull = initPullToRefresh({
+      container,
+      onRefresh: async () => {
+        kegiatanCache = await getKegiatan();
+        renderKegiatanList(searchInput?.value ?? '');
+      }
+    });
   } catch (e) {
     container.innerHTML = `
       <div class="empty-state">
@@ -97,7 +104,7 @@ function renderKegiatanList(keyword: string): void {
       ${data.map((k) => `
         <article class="anggota-card kegiatan-card">
           <div class="kegiatan-header">
-            <div class="anggota-name">${esc(k.judul)}</div>
+            <div class="anggota-name">${q ? highlightMatch(k.judul, keyword) : esc(k.judul)}</div>
             <div class="kegiatan-badge">${formatDate(k.tanggal)}</div>
           </div>
           <div class="anggota-info">
@@ -116,12 +123,12 @@ function renderKegiatanList(keyword: string): void {
 
   // Absensi button
   container.querySelectorAll<HTMLButtonElement>('.btn-absensi').forEach((btn) => {
-    btn.addEventListener('click', () => navigate(`/kegiatan/absensi?id=${btn.dataset.id}`));
+    btn.addEventListener('click', () => navigate(`/kegiatan/absensi/${btn.dataset.id}`));
   });
 
   // Edit button
   container.querySelectorAll<HTMLButtonElement>('.btn-edit').forEach((btn) => {
-    btn.addEventListener('click', () => navigate(`/kegiatan/edit?id=${btn.dataset.id}`));
+    btn.addEventListener('click', () => navigate(`/kegiatan/edit/${btn.dataset.id}`));
   });
 
   // Delete button
@@ -143,6 +150,7 @@ function renderKegiatanList(keyword: string): void {
       try {
         await deleteKegiatan(id);
         kegiatanCache = kegiatanCache.filter((k) => k.id !== id);
+        invalidateBadgeCache();
         renderKegiatanList(document.querySelector<HTMLInputElement>('#search-kegiatan')?.value ?? '');
         showToast('✓ Kegiatan berhasil dihapus.');
       } catch (err) {
@@ -154,27 +162,4 @@ function renderKegiatanList(keyword: string): void {
   });
 }
 
-function formatDate(dateStr: string): string {
-  try {
-    const date = new Date(dateStr);
-    const options: Intl.DateTimeFormatOptions = { 
-      weekday: 'short', 
-      day: 'numeric', 
-      month: 'short',
-      year: 'numeric'
-    };
-    return date.toLocaleDateString('id-ID', options);
-  } catch {
-    return dateStr;
-  }
-}
 
-function shortText(s: string, max: number): string {
-  return s.length > max ? `${s.slice(0, max - 1)}…` : s;
-}
-
-function esc(s: string): string {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}

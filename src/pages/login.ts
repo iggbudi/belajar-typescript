@@ -53,8 +53,9 @@ export function mountLogin(): void {
     }
 
     // Simulate brief delay for UX
-    setTimeout(() => {
-      if (login(username, password)) {
+    setTimeout(async () => {
+      const success = await login(username, password);
+      if (success) {
         errorEl!.classList.add('hidden');
         navigate('/dashboard');
       } else {

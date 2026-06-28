@@ -209,7 +209,65 @@ export function initPullToRefresh(options: PullToRefreshOptions): () => void {
   };
 }
 
+// ── Unsaved Changes Guard ──
+
+let _hasUnsavedChanges = false;
+let _unsavedMessage = 'Data yang belum disimpan akan hilang. Yakin mau keluar?';
+
+export function markDirty(dirty = true): void { _hasUnsavedChanges = dirty; }
+export function isDirty(): boolean { return _hasUnsavedChanges; }
+
+export function initUnsavedGuard(): void {
+  window.addEventListener('beforeunload', (e) => {
+    if (_hasUnsavedChanges) { e.preventDefault(); e.returnValue = ''; }
+  });
+}
+
+export function clearDirty(): void { _hasUnsavedChanges = false; }
+
+export async function confirmIfDirty(): Promise<boolean> {
+  if (!_hasUnsavedChanges) return true;
+  const ok = await confirmDialog({
+    title: '⚠️ Belum Disimpan',
+    message: _unsavedMessage,
+    confirmText: 'Tinggalkan',
+    cancelText: 'Batal'
+  });
+  if (ok) _hasUnsavedChanges = false;
+  return ok;
+}
+
+// ── Offline Indicator ──
+
+let offlineBanner: HTMLDivElement | null = null;
+
+function showOfflineBanner(): void {
+  if (offlineBanner) return;
+  offlineBanner = document.createElement('div');
+  offlineBanner.className = 'offline-banner';
+  offlineBanner.innerHTML = '📡 Mode Offline — Data mungkin tidak terbaru';
+  document.body.prepend(offlineBanner);
+  requestAnimationFrame(() => offlineBanner!.classList.add('show'));
+}
+
+function hideOfflineBanner(): void {
+  if (!offlineBanner) return;
+  offlineBanner.classList.remove('show');
+  setTimeout(() => { offlineBanner?.remove(); offlineBanner = null; }, 300);
+}
+
+export function initOfflineIndicator(): void {
+  if (!navigator.onLine) showOfflineBanner();
+  window.addEventListener('online', hideOfflineBanner);
+  window.addEventListener('offline', showOfflineBanner);
+}
+
 // ── Badge Counter ──
+
+let _invalidateBadge: (() => void) | null = null;
+
+export function onBadgeInvalidate(fn: () => void): void { _invalidateBadge = fn; }
+export function invalidateBadgeCache(): void { _invalidateBadge?.(); }
 
 export function updateNavBadge(count: number, type: 'anggota' | 'kegiatan' = 'anggota'): void {
   const badge = document.querySelector<HTMLSpanElement>(`#nav-badge-${type}`);
@@ -219,8 +277,31 @@ export function updateNavBadge(count: number, type: 'anggota' | 'kegiatan' = 'an
   }
 }
 
-function esc(s: string): string {
+export function esc(s: string): string {
   const d = document.createElement('div');
   d.textContent = s;
   return d.innerHTML;
+}
+
+export function shortText(s: string, max: number): string {
+  return s.length > max ? `${s.slice(0, max - 1)}...` : s;
+}
+
+export function highlightMatch(text: string, query: string): string {
+  if (!query.trim()) return esc(text);
+  const escaped = esc(text);
+  const q = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escaped.replace(new RegExp(`(${q})`, 'gi'), '<mark>$1</mark>');
+}
+
+export function formatDate(dateStr: string, style: 'short' | 'long' = 'short'): string {
+  try {
+    const date = new Date(dateStr);
+    const options: Intl.DateTimeFormatOptions = style === 'long'
+      ? { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }
+      : { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
+    return date.toLocaleDateString('id-ID', options);
+  } catch {
+    return dateStr;
+  }
 }

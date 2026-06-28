@@ -1,19 +1,22 @@
 import { getKegiatanById, createKegiatan, updateKegiatan } from '../../api/kegiatan';
-import { logout } from '../../auth';
 import { navigate } from '../../router';
-import { setFlashToast } from '../../ui';
+import { setFlashToast, invalidateBadgeCache, markDirty, clearDirty, confirmIfDirty } from '../../ui';
 
-export function kegiatanFormPage(isEdit: boolean): string {
+let _formId: string | undefined;
+let _formIsEdit: boolean;
+
+export function kegiatanFormPage(isEdit: boolean, id?: string): string {
+  _formIsEdit = isEdit;
+  _formId = id;
   const today = new Date().toISOString().split('T')[0];
-  
+  const label = isEdit;
   return `
     <header>
       <div class="header-row">
         <div>
-          <p class="header-kicker">${isEdit ? '✏️ Perbarui Kegiatan' : '➕ Kegiatan Baru'}</p>
-          <h1>${isEdit ? 'Edit' : 'Tambah'} Kegiatan</h1>
+          <p class="header-kicker">${label ? '✏️ Perbarui Kegiatan' : '➕ Kegiatan Baru'}</p>
+          <h1>${label ? 'Edit' : 'Tambah'} Kegiatan</h1>
         </div>
-        <button id="logout-btn" class="logout-btn" title="Keluar">🚪 Keluar</button>
       </div>
     </header>
 
@@ -97,20 +100,13 @@ export function kegiatanFormPage(isEdit: boolean): string {
 }
 
 export async function mountKegiatanForm(): Promise<void> {
-  document.querySelector<HTMLButtonElement>('#logout-btn')
-    ?.addEventListener('click', () => {
-      logout();
-      navigate('/login');
-    });
-
-  const params = new URLSearchParams(location.hash.split('?')[1] ?? '');
-  const id = params.get('id') ? Number(params.get('id')) : null;
-  const isEdit = id !== null;
+  const isEdit = _formIsEdit;
+  const numId = isEdit ? Number(_formId) : null;
 
   // Load data if edit
-  if (isEdit && id) {
+  if (isEdit && numId) {
     try {
-      const k = await getKegiatanById(id);
+      const k = await getKegiatanById(numId);
       if (k) {
         (document.querySelector<HTMLInputElement>('#field-judul')!).value = k.judul;
         (document.querySelector<HTMLInputElement>('#field-tanggal')!).value = k.tanggal;
@@ -122,9 +118,15 @@ export async function mountKegiatanForm(): Promise<void> {
     }
   }
 
+  // Track dirty state
+  const formEl = document.querySelector<HTMLFormElement>('#kegiatan-form');
+  formEl?.addEventListener('input', () => markDirty());
+
   // Cancel button
   document.querySelector<HTMLButtonElement>('#btn-batal')
-    ?.addEventListener('click', () => navigate('/kegiatan'));
+    ?.addEventListener('click', async () => {
+      if (await confirmIfDirty()) navigate('/kegiatan');
+    });
 
   // Form submit
   document.querySelector<HTMLFormElement>('#kegiatan-form')
@@ -168,12 +170,14 @@ export async function mountKegiatanForm(): Promise<void> {
       submitBtn.textContent = '⏳ Menyimpan...';
 
       try {
-        if (isEdit && id) {
-          await updateKegiatan(id, { judul, tanggal, lokasi, deskripsi });
+        if (isEdit && numId) {
+          await updateKegiatan(numId, { judul, tanggal, lokasi, deskripsi });
         } else {
           await createKegiatan({ judul, tanggal, lokasi, deskripsi });
         }
         setFlashToast(isEdit ? '✓ Kegiatan berhasil diperbarui.' : '✓ Kegiatan baru berhasil disimpan.');
+        invalidateBadgeCache();
+        clearDirty();
         navigate('/kegiatan');
       } catch (err) {
         submitBtn.disabled = false;
@@ -187,7 +191,7 @@ export async function mountKegiatanForm(): Promise<void> {
           lokasi,
           deskripsi,
           isEdit,
-          id
+          formId: _formId
         });
         errorEl.textContent = `❌ Gagal menyimpan data. ${error.message}`;
         errorEl.classList.remove('hidden');

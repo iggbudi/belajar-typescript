@@ -1,8 +1,14 @@
-import { logout } from '../auth';
-import { navigate } from '../router';
-import { getAnggota, type Anggota } from '../api/anggota';
-import { getStatsKegiatan } from '../api/kegiatan';
-import { skeletonStats, getGreeting } from '../ui';
+import { apiGet } from '../api/http';
+import { skeletonStats, getGreeting, initPullToRefresh } from '../ui';
+
+interface Stats {
+  totalAnggota: number;
+  total: number;
+  bulanIni: number;
+  totalHadir: number;
+}
+
+let cleanupPull: (() => void) | null = null;
 
 export function dashboardPage(): string {
   return `
@@ -12,7 +18,6 @@ export function dashboardPage(): string {
           <p class="header-kicker">Beranda</p>
           <h1>Selamat datang</h1>
         </div>
-        <button id="logout-btn" class="logout-btn" title="Keluar">🚪 Keluar</button>
       </div>
     </header>
 
@@ -28,23 +33,25 @@ export function dashboardPage(): string {
 }
 
 export function mountDashboard(): void {
-  document.querySelector<HTMLButtonElement>('#logout-btn')
-    ?.addEventListener('click', () => {
-      logout();
-      navigate('/login');
-    });
-
+  cleanupPull?.();
   loadDashboardData();
+
+  const container = document.querySelector<HTMLDivElement>('#stats-container')!;
+  cleanupPull = initPullToRefresh({
+    container,
+    onRefresh: loadDashboardData,
+  });
+}
+
+export function unmountDashboard(): void {
+  cleanupPull?.();
+  cleanupPull = null;
 }
 
 async function loadDashboardData(): Promise<void> {
   try {
-    const [data, statsKegiatan] = await Promise.all([
-      getAnggota(),
-      getStatsKegiatan()
-    ]);
-
-    renderStats(data, statsKegiatan);
+    const stats = await apiGet<Stats>('/stats');
+    renderStats(stats);
   } catch (e) {
     const statsContainer = document.querySelector<HTMLDivElement>('#stats-container')!;
     statsContainer.innerHTML = `
@@ -58,39 +65,36 @@ async function loadDashboardData(): Promise<void> {
   }
 }
 
-function renderStats(data: Anggota[], statsKegiatan: { total: number; bulanIni: number; totalHadir: number }): void {
+function renderStats(stats: Stats): void {
   const statsContainer = document.querySelector<HTMLDivElement>('#stats-container')!;
-  const total = data.length;
-  const withPhone = data.filter(a => a.no_telepon && a.no_telepon.trim()).length;
-  const withoutPhone = total - withPhone;
 
   statsContainer.innerHTML = `
     <div class="stat-card">
-      <div class="stat-number">${total}</div>
+      <div class="stat-number">${stats.totalAnggota}</div>
       <div class="stat-label">Total Anggota</div>
     </div>
     <div class="stats-row">
       <div class="stat-card-secondary">
         <div class="stat-icon">📅</div>
-        <div class="stat-number">${statsKegiatan.total}</div>
+        <div class="stat-number">${stats.total}</div>
         <div class="stat-label">Total Kegiatan</div>
       </div>
       <div class="stat-card-secondary">
         <div class="stat-icon">📋</div>
-        <div class="stat-number">${statsKegiatan.bulanIni}</div>
+        <div class="stat-number">${stats.bulanIni}</div>
         <div class="stat-label">Kegiatan Bulan Ini</div>
       </div>
     </div>
     <div class="stats-row">
       <div class="stat-card-secondary">
-        <div class="stat-icon">📱</div>
-        <div class="stat-number">${withPhone}</div>
-        <div class="stat-label">Ada Telepon</div>
+        <div class="stat-icon">✅</div>
+        <div class="stat-number">${stats.totalHadir}</div>
+        <div class="stat-label">Total Kehadiran</div>
       </div>
       <div class="stat-card-secondary">
-        <div class="stat-icon">📵</div>
-        <div class="stat-number">${withoutPhone}</div>
-        <div class="stat-label">Belum Lengkap</div>
+        <div class="stat-icon">📊</div>
+        <div class="stat-number">${stats.totalAnggota > 0 ? Math.round(stats.totalHadir / Math.max(stats.total, 1) * 100) : 0}%</div>
+        <div class="stat-label">Rata-rata Hadir</div>
       </div>
     </div>
   `;
